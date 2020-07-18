@@ -5,7 +5,6 @@ const withAuth = require('../middlewares/auth');
 
 router.post('/', withAuth, async (req, res) => {
     const { albumId } = req.body;
-    console.log(req.user._id);
     let like = new Like({ album: albumId, user: req.user._id });
 
     try {
@@ -17,9 +16,19 @@ router.post('/', withAuth, async (req, res) => {
 })
 
 router.get('/', withAuth, async (req, res) => {
+    const { albumId } = req.query;
     try {
-        let likes = await Like.find({ user: req.user._id });
-        res.send(likes)
+        if (albumId) {
+            let likes = await Like
+                .find({ user: req.user._id, album: albumId })
+                .populate('album');
+            res.send(likes)
+        } else {
+            let likes = await Like
+                .find({ user: req.user._id })
+                .populate('album');
+            res.send(likes)
+        }
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }
@@ -30,7 +39,7 @@ router.delete('/:id', withAuth, async (req, res) => {
     try {
         let like = await Like.findById(id);
         if (isOwner(req.user, like)) {
-            await Like.findByIdAndDelete(id);
+            await Like.findOneAndDelete(id);
             res.json({ message: "Ok" });
         } else {
             res.status(403).json({ error: "Permission denied" });

@@ -15,18 +15,6 @@ router.post('/', withAuth, async (req, res) => {
     }
 })
 
-router.get('/search', async (req, res) => {
-    const { query } = req.query;
-    try {
-        let albums = await Album
-            .find({ user: req.user._id })
-            .find({ $text: { $search: query } });
-        res.send(albums)
-    } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
-    }
-})
-
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -41,11 +29,19 @@ router.get('/:id', async (req, res) => {
 })
 
 router.get('/', async (req, res) => {
+    const { query } = req.query;
     try {
-        let albums = await Album
-            .find({})
-            .populate('user');
-        res.send(albums)
+        if (query) {
+            let albums = await Album
+                .find({ $text: { $search: query } })
+                .populate('user');
+            res.send(albums)
+        } else {
+            let albums = await Album
+                .find({})
+                .populate('user');
+            res.send(albums)
+        }
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }

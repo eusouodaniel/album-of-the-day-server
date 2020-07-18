@@ -35,4 +35,12 @@ let albumSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
+albumSchema.index({
+    'title': 'text',
+    'artist': 'text',
+    'genre': 'text',
+    'image_url': 'text',
+    'best_music': 'text'
+})
+
 module.exports = mongoose.model('Album', albumSchema);
