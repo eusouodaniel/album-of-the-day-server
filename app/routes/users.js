@@ -3,6 +3,7 @@ var router = express.Router();
 const User = require('../schemas/user');
 const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_TOKEN;
+const withAuth = require('../middlewares/auth');
 
 router.post('/login', async function (req, res) {
     const { email, password } = req.body.credential;
@@ -42,6 +43,26 @@ router.post('/register', async function (req, res) {
     }
 });
 
+router.put('/user-profile', withAuth, async (req, res) => {
+    const { name, celphone } = req.body;
+    try {
+        let user = await User.findById(req.user._id);
+        if (isOwner(req.user, user)) {
+            let user = await User.findOneAndUpdate(
+                { _id: req.user._id },
+                { $set: { name: name, celphone: celphone } },
+                { upsert: true, 'new': true }
+            )
+
+            res.send({ user: user, updated: true });
+        } else {
+            res.status(403).json({ error: "Permission denied" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Error when update user" });
+    }
+})
+
 router.post('/forgot-password', async function (req, res) {
     const { email, password, celphone } = req.body;
     if (celphone) {
@@ -65,5 +86,12 @@ router.post('/forgot-password', async function (req, res) {
         res.send({ updated: true });
     }
 });
+
+const isOwner = (req, user) => {
+    if (JSON.stringify(req._id) == JSON.stringify(user._id)) {
+        return true;
+    }
+    return false;
+}
 
 module.exports = router;
