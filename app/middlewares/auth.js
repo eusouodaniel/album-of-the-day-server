@@ -3,7 +3,7 @@ const User = require('../schemas/user');
 const secret = process.env.JWT_TOKEN;
 
 const withAuth = (req, res, next) => {
-    const token = req.headers['access-token'];
+    const token = req.headers['authorization'];
     if (!token) {
         res.status(401).json({ error: "Unauthorized" });
     } else {

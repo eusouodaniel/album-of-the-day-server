@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_TOKEN;
 
 router.post('/login', async function (req, res) {
-    const { email, password } = req.body;
+    const { email, password } = req.body.credential;
     let user = await User.findOne({ email });
     try {
         if (!user) {
@@ -16,7 +16,7 @@ router.post('/login', async function (req, res) {
                     res.status(401).json({ error: "Incorrect email or password" });
                 } else {
                     const token = jwt.sign({ email }, secret, { expiresIn: process.env.JWT_EXPIRES_IN });
-                    res.json({ user: user, token: token });
+                    res.status(200).send({ user: user, token: token });
                 }
             });
         }
@@ -26,13 +26,18 @@ router.post('/login', async function (req, res) {
 });
 
 router.post('/register', async function (req, res) {
-    const { name, email, password, celphone } = req.body;
+    const { name, email, celphone, password } = req.body.credential;
     const user = new User({ name, email, password, celphone });
 
     try {
         await user.save();
-        res.status(200).json(user);
+        const token = jwt.sign({ email }, secret, { expiresIn: process.env.JWT_EXPIRES_IN });
+        res.status(200).send({
+            user: user,
+            token: token
+        });
     } catch (error) {
+        console.log(error)
         res.status(500).json({ error: "Error registering new user please try again" });
     }
 });
