@@ -4,8 +4,8 @@ const Album = require('../schemas/album');
 const withAuth = require('../middlewares/auth');
 
 router.post('/', withAuth, async (req, res) => {
-    const { title, artist, best_music, embed } = req.body;
-    let album = new Album({ title, artist, best_music, embed, user: req.user._id });
+    const { title, artist, genre, image_url, best_music, embed } = req.body;
+    let album = new Album({ title, artist, genre, image_url, best_music, embed, user: req.user._id });
 
     try {
         await album.save();
@@ -15,7 +15,7 @@ router.post('/', withAuth, async (req, res) => {
     }
 })
 
-router.get('/search', withAuth, async (req, res) => {
+router.get('/search', async (req, res) => {
     const { query } = req.query;
     try {
         let albums = await Album
@@ -27,24 +27,24 @@ router.get('/search', withAuth, async (req, res) => {
     }
 })
 
-router.get('/:id', withAuth, async (req, res) => {
+router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        let album = await Album.findById(id);
-        if (isOwner(req.user, album)) {
-            res.status(200).json(album);
-        } else {
-            res.status(403).json({ error: "Permission denied" });
-        }
+        let album = await Album
+            .findOne({ _id: id })
+            .populate('user');
 
+        res.status(200).json(album);
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }
 })
 
-router.get('/', withAuth, async (req, res) => {
+router.get('/', async (req, res) => {
     try {
-        let albums = await Album.find({ user: req.user._id });
+        let albums = await Album
+            .find({})
+            .populate('user');
         res.send(albums)
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });

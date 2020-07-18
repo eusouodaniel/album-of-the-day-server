@@ -4,8 +4,9 @@ const Like = require('../schemas/like');
 const withAuth = require('../middlewares/auth');
 
 router.post('/', withAuth, async (req, res) => {
-    const { album } = req.body;
-    let like = new Like({ album: album._id, user: req.user._id });
+    const { albumId } = req.body;
+    console.log(req.user._id);
+    let like = new Like({ album: albumId, user: req.user._id });
 
     try {
         await like.save();
@@ -40,7 +41,7 @@ router.delete('/:id', withAuth, async (req, res) => {
 })
 
 const isOwner = (user, like) => {
-    if (JSON.stringify(user._id) == JSON.stringify(Like.user._id)) {
+    if (JSON.stringify(user._id) == JSON.stringify(like.user._id)) {
         return true;
     }
 
