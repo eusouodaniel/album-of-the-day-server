@@ -1,6 +1,6 @@
 # Album of the day - Backend
 
-[![Heroku](http://heroku-badge.herokuapp.com/?app=api-album-of-the-day)]
+![Heroku](http://heroku-badge.herokuapp.com/?app=api-album-of-the-day)
 
 ## How to run
 - Using mongo with docker container: **docker-compose up -d**
