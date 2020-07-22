@@ -64,7 +64,7 @@ router.put('/:id', withAuth, async (req, res) => {
             res.status(403).json({ error: "Permission denied" });
         }
     } catch (error) {
-        res.status(500).json({ error: "Error when update albm" });
+        res.status(500).json({ error: "Error when update album" });
     }
 })
 
